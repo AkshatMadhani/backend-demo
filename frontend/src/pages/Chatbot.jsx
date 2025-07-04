@@ -1,15 +1,27 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export default function Chatbot() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const messagesEndRef = useRef(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
   const sendMessage = async () => {
     if (!input.trim()) return
     const userMsg = { role: 'user', content: input }
     setMessages((prev) => [...prev, userMsg])
     setInput('')
+    setLoading(true)
     try {
       const res = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
@@ -21,6 +33,8 @@ export default function Chatbot() {
       setMessages((prev) => [...prev, botMsg])
     } catch (err) {
       alert('Error connecting to chatbot API')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -33,6 +47,8 @@ export default function Chatbot() {
             {m.content}
           </div>
         ))}
+        {loading && <div className="msg-bot">Thinking...</div>}
+        <div ref={messagesEndRef} />
       </div>
       <div className="chat-input">
         <input
