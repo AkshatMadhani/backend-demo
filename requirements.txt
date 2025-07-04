@@ -2,3 +2,6 @@ groq
 streamlit
 exa
 exa_py
+
+fastapi
+uvicorn[standard]
